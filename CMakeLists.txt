@@ -14,8 +14,8 @@ message(STATUS "MJX_INCLUDE_DIR=${MJX_INCLUDE_DIR}")
 # Options
 ####################################################################################
 
-option(MJX_BUILD_BOOST "Download and build Boost" OFF)
-option(MJX_BUILD_GRPC "Download and build gRPC" OFF)
+option(MJX_BUILD_BOOST "Download and build Boost" ON)
+option(MJX_BUILD_GRPC "Download and build gRPC" ON)
 option(MJX_BUILD_TESTS "Build tests" OFF)
 option(MJX_BUILD_PYTHON "Build as Python library " OFF)
 
@@ -36,7 +36,7 @@ message(STATUS "Include Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
 # gRPC
 ####################################################################################
 
-message(STATUS "MJX_BUILD_GRPC=${MJX_BUILD_BOOST}")
+message(STATUS "MJX_BUILD_GRPC=${MJX_BUILD_GRPC}")
 if(MJX_BUILD_GRPC)
   include(${MJX_INCLUDE_DIR}/mjx/cmake/downloaded_grpc.cmake)
 else()
@@ -176,7 +176,19 @@ endif()
 ####################################################################################
 
 if(MJX_BUILD_PYTHON)
-  add_subdirectory(pybind11)
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pybind11/CMakeLists.txt)
+    add_subdirectory(pybind11)
+  else()
+    include(FetchContent)
+    FetchContent_Declare(
+      pybind11
+      GIT_REPOSITORY https://github.com/pybind/pybind11.git
+      GIT_TAG v2.13.6
+      GIT_SHALLOW TRUE
+      GIT_PROGRESS TRUE
+    )
+    FetchContent_MakeAvailable(pybind11)
+  endif()
   pybind11_add_module(_mjx mjx/pybind.cpp)
   target_include_directories(_mjx PRIVATE ${MJX_INCLUDE_DIR})
   target_link_libraries(_mjx PRIVATE mjx)

@@ -14,7 +14,7 @@
 <img src="icons/SVG/2-2_svg.svg" alt="mjx" width="300"/>
 </p>
 
-⚠️ Currently Mjx build is broken. Also, Mjx API will change in the near future.
+⚠️ Mjx is under active development, and APIs may change in the near future.
 
 # Mjx
 
@@ -62,7 +62,7 @@ while not env.done():
 returns = env.rewards()
 ```
 
-## Sever Usage
+## Server Usage
 
 <table>
 <tr><th>Server</th><th>Client</th></tr>
@@ -110,15 +110,15 @@ mjx.run(
 </tr>
 </table>
 
-This sever usage uses gRPC. Thus, actually any programming language is available to develop your own Mahjong AI.
-For Python, we provide a convinent wrapper `mjx.Agent.serve()`.
+This server usage uses gRPC. Thus, actually any programming language is available to develop your own Mahjong AI.
+For Python, we provide a convenient wrapper `mjx.Agent.serve()`.
 
 ## Notes
 
 Mjx is still under active development. APIs might change without notice before v1.0.
 Especially,
 
-* Default behavior of `env.rewards(reward_type)`and `env.done(done_type)`
+* Default behavior of `env.rewards(reward_type)` and `env.done(done_type)`
 * Protobuf schema
 * Feature extraction APIs (currently, provided by `Observation.to_features()`)
 
