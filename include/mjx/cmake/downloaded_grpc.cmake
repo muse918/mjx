@@ -1,25 +1,3 @@
-# Forked from https://github.com/grpc/grpc/blob/master/examples/cpp/cmake/common.cmake
-#
-
-# Copyright 2018 gRPC authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# cmake build file for C++ route_guide example.
-# Assumes protobuf and gRPC have been installed using cmake.
-# See cmake_externalproject/CMakeLists.txt for all-in-one cmake build
-# that automatically builds all the dependencies before building route_guide.
-
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
 include(FetchContent)
@@ -32,12 +10,38 @@ fetchcontent_declare(
   GIT_REPOSITORY https://github.com/grpc/grpc.git
   GIT_TAG v1.49.1
   GIT_PROGRESS TRUE
+  GIT_SHALLOW TRUE
 )
+set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_CODEGEN ON CACHE BOOL "" FORCE)
 fetchcontent_makeavailable(grpc)
 
-# TODO: if there is a preinstalled protoc, preinstalled one may be used. We should prevent it.
 set(_PROTOBUF_LIBPROTOBUF libprotobuf)
 set(_REFLECTION grpc++_reflection)
-set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
 set(_GRPC_GRPCPP grpc++)
-set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
+
+if(DEFINED _gRPC_PROTOBUF_PROTOC)
+  set(_PROTOBUF_PROTOC ${_gRPC_PROTOBUF_PROTOC})
+elseif(TARGET protobuf::protoc)
+  set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+elseif(TARGET protoc)
+  set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
+else()
+  find_program(_PROTOBUF_PROTOC protoc)
+endif()
+
+if(DEFINED _gRPC_CPP_PLUGIN_EXECUTABLE)
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE ${_gRPC_CPP_PLUGIN_EXECUTABLE})
+elseif(TARGET grpc_cpp_plugin)
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
+elseif(TARGET grpc::grpc_cpp_plugin)
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc::grpc_cpp_plugin>)
+else()
+  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
+endif()
+
+if(NOT _PROTOBUF_PROTOC OR NOT _GRPC_CPP_PLUGIN_EXECUTABLE)
+  message(FATAL_ERROR "Could not resolve protoc/grpc_cpp_plugin for downloaded grpc build")
+endif()
